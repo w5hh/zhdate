@@ -1,0 +1,1 @@
+cl src/main.cpp /Fo"Build/" /Fe"Build/" /std:c++20 /EHsc
