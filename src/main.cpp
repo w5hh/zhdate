@@ -9,9 +9,11 @@ int main(int argc, char const *argv[])
         t = atol(argv[1]);
     }
     char buf[20]{0};
-    strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S", localtime(&t)); // 2023-01-1
-    printf("时间戳:%ld\n公历:%s\n", t, buf);
-    wuhh::Date date(*localtime(&t));
+    tm _tm;
+    wuhh::lts(&t, &_tm);
+    strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S", &_tm); // 2023-01-1
+    printf("时间戳:%lld\n公历:%s\n", t, buf);
+    wuhh::Date date(_tm);
     cout << "公历(初始化):" << date.toStr() << endl;
     date.nongli(); // 改为农历
     cout << "农历:" << date.toStr() << endl;

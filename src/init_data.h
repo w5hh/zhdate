@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
 #define s2y(x) (x + 1900) /*年数转为年份值*/
 #define y2s(x) (x - 1900) /*年份值转为年数*/
@@ -242,5 +242,8 @@ static constexpr uint8_t CHINESENEWYEAR[][3] = {
 
 static constexpr const char *ZHNUMS[] = {"零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"};
 static constexpr const char *shengxiao[] = {"鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"};
+// 天干
 static constexpr const char *TIANGAN[] = {"甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"};
+// 地支
 static constexpr const char *DIZHI[] = {"子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"};
+static constexpr const auto DAY_TIMES = 86400; // 一天的秒数

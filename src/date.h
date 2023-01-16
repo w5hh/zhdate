@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
@@ -9,6 +9,15 @@
 namespace wuhh
 {
 #include "init_data.h"
+    // 封装localtime_s，统一参数
+    auto lts(const time_t *times, tm *_t)
+    { // Microsoft CRT 中的 localtime_s 实现与 C 标准不兼容，因为它有相反的参数顺序。
+#if _WIN32 || _WIN64
+        return localtime_s(_t, times);
+#else
+        return localtime_s(times, _t);
+#endif
+    }
     // 日期,为了简化tm结构体,默认为公历
     class Date
     {
@@ -74,7 +83,7 @@ namespace wuhh
 
     public:
         // 设置公历日期
-        Date &setGongli(const uint8_t &y, const uint8_t &m, const uint8_t &d)
+        Date &setGongli(const uint8_t &y, const uint8_t &m, const uint8_t &d) noexcept
         {
             d_year = y;
             d_month = m;
@@ -84,17 +93,17 @@ namespace wuhh
             return *this;
         }
         Date() = default;
-        Date(const uint8_t &y, const uint8_t &m, const uint8_t &d)
+        Date(const uint8_t &y, const uint8_t &m, const uint8_t &d) noexcept
         {
             this->setGongli(y, m, d);
         }
-        Date(tm t) : Date(t.tm_year, t.tm_mon, t.tm_mday)
+        Date(tm t) noexcept : Date(t.tm_year, t.tm_mon, t.tm_mday)
         {
         }
         Date(const uint8_t arr[3]) : Date(arr[0], arr[1], arr[2])
         {
         }
-        operator tm()
+        operator tm() noexcept
         {
             tm tm_;
             tm_.tm_year = d_year; // 年，由于tm结构体存储的是从1900年开始的时间，所以tm_year为int临时变量减去1900。
@@ -107,20 +116,20 @@ namespace wuhh
             return tm_;
         }
         // 判断是否农历
-        bool isZh()
+        bool isZh() noexcept
         {
             return type == TYPE::NONGLI;
         }
         // 判断闰月
-        bool isLeap()
+        bool isLeap() noexcept
         {
             return isZh() && d_month == leap_month;
         }
-        uint16_t getYear()
+        uint16_t getYear() noexcept
         {
             return d_year + 1900;
         }
-        uint8_t getMonth()
+        uint8_t getMonth() noexcept
         {
             if (isZh() && leap_month && d_month >= leap_month)
             {
@@ -128,11 +137,11 @@ namespace wuhh
             }
             return d_month + 1;
         }
-        uint8_t getDay()
+        uint8_t getDay() noexcept
         {
             return d_day;
         }
-        bool operator<(const Date &d)
+        bool operator<(const Date &d) noexcept
         {
             if ((*this) == d || d_year > d.d_year || d_month > d.d_month || d_day > d.d_day)
             {
@@ -140,7 +149,7 @@ namespace wuhh
             }
             return true;
         }
-        bool operator==(const Date &d)
+        bool operator==(const Date &d) noexcept
         {
             return (d_year == d.d_year && d_month == d.d_month && d_day == d.d_day);
         }
@@ -154,7 +163,7 @@ namespace wuhh
                 return ss.str();
             }
             std::string str;
-            for (int x = std::pow(10, 3); x > 0; x /= 10)
+            for (int x = (int)std::pow(10, 3); x > 0; x /= 10)
             {
                 auto d = std::div(_year, x);
                 _year = d.rem;              // 余数
@@ -251,9 +260,10 @@ namespace wuhh
             // 当前农历新年对应的时间戳
             auto first_time = Date(CHINESENEWYEAR[d_year]).timestamp();
             // 公历的时间戳
-            auto times = (diff_days - 1) * 86400 + first_time;
-            auto _t = localtime(&times);
-            setGongli(_t->tm_year, _t->tm_mon, _t->tm_mday); // 转为公历
+            time_t times = (diff_days - 1) * DAY_TIMES + first_time;
+            tm _t;
+            lts(&times, &_t);
+            setGongli(_t.tm_year, _t.tm_mon, _t.tm_mday); // 转为公历
             return *this;
         }
         // 将日期改为农历
@@ -274,7 +284,7 @@ namespace wuhh
             // 闰月
             leap_month = (year_code & 0xf);
             auto days_arr = decode((year_code & 0xffff) >> 4, leap_month, year_code >> 16);
-            diff_days = (ts - Date(CHINESENEWYEAR[d_year]).timestamp()) / 86400 + 1; // 当前农历年的第几天
+            diff_days = (uint16_t)(ts - Date(CHINESENEWYEAR[d_year]).timestamp()) / DAY_TIMES + 1; // 当前农历年的第几天
             // 已经度过的天数
             uint16_t days = 0;
             d_month = 0;
