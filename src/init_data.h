@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <cstdint>
+
 #define s2y(x) (x + 1900) /*年数转为年份值*/
 #define y2s(x) (x - 1900) /*年份值转为年数*/
 #define s2m(x) (x + 1)    /*月数转为月份值*/

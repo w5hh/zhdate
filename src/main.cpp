@@ -10,9 +10,10 @@ int main(int argc, char const *argv[])
     }
     char buf[20]{0};
     tm _tm;
-    wuhh::lts(&t, &_tm);
+    LOCALTIME_R(&t, &_tm);
     strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S", &_tm); // 2023-01-1
-    printf("时间戳:%lld\n公历:%s\n", t, buf);
+    cout << "时间戳:" << t << endl
+         << "公历:" << buf << endl;
     wuhh::Date date(_tm);
     cout << "公历(初始化):" << date.toStr() << endl;
     date.nongli(); // 改为农历

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F19B9C292974278800BA95B6 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F19B9C282974278800BA95B6 /* main.cpp */; };
+		F1D8770E29756EFA0015BC8A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F1D8770D29756EFA0015BC8A /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,9 +24,9 @@
 
 /* Begin PBXFileReference section */
 		F19B9C252974278800BA95B6 /* zhdate */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = zhdate; sourceTree = BUILT_PRODUCTS_DIR; };
-		F19B9C282974278800BA95B6 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = ../main.cpp; sourceTree = "<group>"; };
 		F19B9C302974331900BA95B6 /* init_data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = init_data.h; sourceTree = "<group>"; };
 		F19B9C312974331900BA95B6 /* date.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = date.h; sourceTree = "<group>"; };
+		F1D8770D29756EFA0015BC8A /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,9 +59,9 @@
 		F19B9C2F2974328700BA95B6 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				F19B9C282974278800BA95B6 /* main.cpp */,
 				F19B9C312974331900BA95B6 /* date.h */,
 				F19B9C302974331900BA95B6 /* init_data.h */,
+				F1D8770D29756EFA0015BC8A /* main.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -123,7 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F19B9C292974278800BA95B6 /* main.cpp in Sources */,
+				F1D8770E29756EFA0015BC8A /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,6 +242,7 @@
 		F19B9C2D2974278800BA95B6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = Build;
@@ -251,6 +252,7 @@
 		F19B9C2E2974278800BA95B6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SYMROOT = Build;

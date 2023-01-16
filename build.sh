@@ -1,3 +1,6 @@
-cd Build
-g++ -O2 -std=c++20 -o main ../src/main.cpp 
+if [ ! -d "build" ]; then
+    mkdir build
+fi
+cd build
+g++ -O2 -std=c++11 -o main ../src/main.cpp
 cd -

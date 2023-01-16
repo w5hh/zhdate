@@ -6,18 +6,15 @@
 #include <string>
 #include <forward_list>
 #include <bitset>
+// 封装localtime_s/localtime_r，统一参数
+#ifdef WIN32
+#define LOCALTIME_R(a, b) localtime_s(b, a) // Microsoft CRT 中的 localtime_s 实现与 C 标准不兼容，因为它有相反的参数顺序。
+#else
+#define LOCALTIME_R(a, b) localtime_r(a, b) // macos中的函数名不一样
+#endif
 namespace wuhh
 {
 #include "init_data.h"
-    // 封装localtime_s，统一参数
-    auto lts(const time_t *times, tm *_t)
-    { // Microsoft CRT 中的 localtime_s 实现与 C 标准不兼容，因为它有相反的参数顺序。
-#if _WIN32 || _WIN64
-        return localtime_s(_t, times);
-#else
-        return localtime_s(times, _t);
-#endif
-    }
     // 日期,为了简化tm结构体,默认为公历
     class Date
     {
@@ -262,7 +259,7 @@ namespace wuhh
             // 公历的时间戳
             time_t times = (diff_days - 1) * DAY_TIMES + first_time;
             tm _t;
-            lts(&times, &_t);
+            LOCALTIME_R(&times, &_t);
             setGongli(_t.tm_year, _t.tm_mon, _t.tm_mday); // 转为公历
             return *this;
         }
