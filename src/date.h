@@ -7,10 +7,12 @@
 #include <forward_list>
 #include <bitset>
 // 封装localtime_s/localtime_r，统一参数
-#ifdef WIN32
-#define LOCALTIME_R(a, b) localtime_s(b, a) // Microsoft CRT 中的 localtime_s 实现与 C 标准不兼容，因为它有相反的参数顺序。
+// Microsoft CRT 中的 localtime_s 实现与 C 标准不兼容，因为它有相反的参数顺序。
+// macos中的函数名不一样
+#if defined _WIN32 || _WIN64
+#define LOCALTIME_R(a, b) localtime_s(b, a)
 #else
-#define LOCALTIME_R(a, b) localtime_r(a, b) // macos中的函数名不一样
+#define LOCALTIME_R(a, b) localtime_r(a, b)
 #endif
 namespace wuhh
 {
