@@ -15,10 +15,9 @@ int main(int argc, char const *argv[])
     cout << "时间戳:" << t << endl
          << "公历:" << buf << endl;
     wuhh::Date date(_tm);
-    cout << "公历(初始化):" << date.toStr() << endl;
-    date.nongli(); // 改为农历
-    cout << "农历:" << date.toStr() << endl;
-    date.gongli(); // 改为公历
-    cout << "公历(重新转换):" << date.toStr() << endl;
+
+    cout << "公历(初始化)\t->\t" << date.type() << '\t' << date.toStr() << endl;
+    cout << "改为农历\t->\t" << date.nongli().type() << '\t' << date.toStr() << endl;
+    cout << "改为公历\t->\t" << date.gongli().type() << '\t' << date.toStr() << endl;
     return 0;
 }

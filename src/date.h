@@ -6,9 +6,11 @@
 #include <string>
 #include <forward_list>
 #include <bitset>
+
 // 封装localtime_s/localtime_r，统一参数
 // Microsoft CRT 中的 localtime_s 实现与 C 标准不兼容，因为它有相反的参数顺序。
-// macos中的函数名不一样
+// macos和linux中的函数名不一样
+
 #if defined _WIN32 || _WIN64
 #define LOCALTIME_R(a, b) localtime_s(b, a)
 #else
@@ -21,40 +23,23 @@ namespace wuhh
     class Date
     {
     public:
-        enum class TYPE
+        enum class Type
         {
             NONGLI,
             GONGLI
         };
 
     private:
-        // 30以内的数字转为中文字符串,用于月份和日期
-        template <typename Int>
-        static std::string md2s(Int i)
-        {
-            if (i == 10)
-                return "十";
-            if (i == 20)
-                return "廿十";
-            if (i == 30)
-                return "三十";
-            if (i < 10)
-                return ZHNUMS[i];
-            if (i > 10 && i < 20)
-                return std::string("十").append(ZHNUMS[i % 10]);
-            // i > 20 && i < 30
-            return std::string("廿").append(ZHNUMS[i % 10]);
-        }
         // 距离1900的年数
         uint8_t d_year;
         // 月[0,11]
         uint8_t d_month;
         // 天[1,31]
         uint8_t d_day;
-        uint16_t diff_days; // 农历的第几天
+        uint16_t d_diff_days; // 农历的第几天[1,360]
         // 当年的闰几月
         uint8_t leap_month = 0;
-        TYPE type = TYPE::GONGLI;
+        Type d_type = Type::GONGLI;
         static std::forward_list<int> decode(std::bitset<12> month_code, uint8_t leap_month, bool big)
         {
             std::forward_list<int> arr;
@@ -79,6 +64,23 @@ namespace wuhh
             }
             return arr;
         }
+        // 30以内的数字转为中文字符串,用于月份和日期
+        template <typename Int>
+        static std::string md2s(Int i)
+        {
+            if (i == 10)
+                return "十";
+            if (i == 20)
+                return "廿十";
+            if (i == 30)
+                return "三十";
+            if (i < 10)
+                return ZHNUMS[i];
+            if (i > 10 && i < 20)
+                return std::string("十").append(ZHNUMS[i % 10]);
+            // i > 20 && i < 30
+            return std::string("廿").append(ZHNUMS[i % 10]);
+        }
 
     public:
         // 设置公历日期
@@ -88,7 +90,7 @@ namespace wuhh
             d_month = m;
             d_day = d;
             leap_month = 0;
-            type = TYPE::GONGLI;
+            d_type = Type::GONGLI;
             return *this;
         }
         Date() = default;
@@ -117,18 +119,18 @@ namespace wuhh
         // 判断是否农历
         bool isZh() noexcept
         {
-            return type == TYPE::NONGLI;
+            return d_type == Type::NONGLI;
         }
         // 判断闰月
         bool isLeap() noexcept
         {
             return isZh() && d_month == leap_month;
         }
-        uint16_t getYear() noexcept
+        uint16_t year() noexcept
         {
             return d_year + 1900;
         }
-        uint8_t getMonth() noexcept
+        uint8_t month() noexcept
         {
             if (isZh() && leap_month && d_month >= leap_month)
             {
@@ -136,9 +138,13 @@ namespace wuhh
             }
             return d_month + 1;
         }
-        uint8_t getDay() noexcept
+        uint8_t day() noexcept
         {
             return d_day;
+        }
+        Type type()
+        {
+            return d_type;
         }
         bool operator<(const Date &d) noexcept
         {
@@ -154,7 +160,7 @@ namespace wuhh
         }
         std::string yearStr()
         {
-            auto _year = getYear();
+            auto _year = year();
             if (!isZh())
             {
                 std::stringstream ss;
@@ -173,7 +179,7 @@ namespace wuhh
         std::string monthStr()
         {
             std::string str;
-            int m = getMonth();
+            int m = month();
             if (!isZh())
             {
                 std::stringstream ss;
@@ -207,7 +213,7 @@ namespace wuhh
             if (!isZh())
             {
                 std::stringstream ss;
-                int d = getDay();
+                int d = day();
                 if (d < 10)
                 {
                     ss << '0';
@@ -216,7 +222,7 @@ namespace wuhh
                 ss >> str;
                 return ss.str();
             }
-            auto d = getDay();
+            auto d = day();
             if (d < 10)
                 return std::string("初").append(md2s(d));
             return md2s(d);
@@ -251,7 +257,7 @@ namespace wuhh
         // 将日期改为公历
         Date &gongli()
         {
-            if (type == TYPE::GONGLI)
+            if (d_type == Type::GONGLI)
             {
                 return *this;
             }
@@ -259,7 +265,7 @@ namespace wuhh
             // 当前农历新年对应的时间戳
             auto first_time = Date(CHINESENEWYEAR[d_year]).timestamp();
             // 公历的时间戳
-            time_t times = (diff_days - 1) * DAY_TIMES + first_time;
+            time_t times = (d_diff_days - 1) * DAY_TIMES + first_time;
             tm _t;
             LOCALTIME_R(&times, &_t);
             setGongli(_t.tm_year, _t.tm_mon, _t.tm_mday); // 转为公历
@@ -268,7 +274,7 @@ namespace wuhh
         // 将日期改为农历
         Date &nongli()
         {
-            if (type == TYPE::NONGLI)
+            if (d_type == Type::NONGLI)
             {
                 return *this;
             }
@@ -278,21 +284,21 @@ namespace wuhh
                 d_year--; // 农历新年还没有到，所以年份-1
             }
             // 下面开始转为农历
-            type = TYPE::NONGLI;
+            d_type = Type::NONGLI;
             auto year_code = CHINESEYEARCODE[d_year];
             // 闰月
             leap_month = (year_code & 0xf);
             auto days_arr = decode((year_code & 0xffff) >> 4, leap_month, year_code >> 16);
-            diff_days = (uint16_t)(ts - Date(CHINESENEWYEAR[d_year]).timestamp()) / DAY_TIMES + 1; // 当前农历年的第几天
+            d_diff_days = static_cast<uint16_t>((ts - Date(CHINESENEWYEAR[d_year]).timestamp()) / DAY_TIMES + 1); // 当前农历年的第几天
             // 已经度过的天数
             uint16_t days = 0;
             d_month = 0;
             for (auto &&i : days_arr)
             {
                 // 月份已经到了
-                if ((days + i) >= diff_days)
+                if ((days + i) >= d_diff_days)
                 {
-                    d_day = diff_days - days;
+                    d_day = d_diff_days - days;
                     break;
                 }
                 d_month++;
@@ -308,4 +314,19 @@ namespace wuhh
             return mktime(&t);
         }
     };
+}
+std::ostream &operator<<(std::ostream &out, const typename wuhh::Date::Type &t)
+{
+    using Type = typename wuhh::Date::Type;
+    switch (t)
+    {
+    case Type::GONGLI:
+        out << "公";
+        break;
+    case Type::NONGLI:
+        out << "农";
+        break;
+    default:;
+    }
+    return out;
 }
